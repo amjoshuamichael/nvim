@@ -25,6 +25,7 @@ return {
 	'svermeulen/vimpeccable',
 
     "https://github.com/morhetz/gruvbox",
+    "rebelot/kanagawa.nvim",
 
     -- File explorer
 	{
@@ -92,5 +93,7 @@ return {
         'Iron-E/nvim-libmodal',
         lazy = true,
         version = '^3.0'
-    }
+    },
+
+    'rebelot/heirline.nvim',
 }

@@ -47,8 +47,8 @@ vim.cmd [[ let g:gruvbox_contrast_dark = 'hard' ]]
 
 -- depending on my mood
 
-vim.cmd.colorscheme("kanagawa")
---vim.cmd.colorscheme("gruvbox")
+--vim.cmd.colorscheme("kanagawa")
+vim.cmd.colorscheme("gruvbox")
 
 -- Disable of netrw recommended for nvim-tree
 vim.g.loaded_netrw = 1

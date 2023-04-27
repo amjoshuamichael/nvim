@@ -1,9 +1,29 @@
+vim.cmd[[
+    set showcmd 
+    set laststatus=2
+    set cmdheight=1
+]]
+
+vim.api.nvim_create_autocmd('InsertEnter', {
+    callback = function()
+        vim.api.nvim_feedkeys(
+            vim.api.nvim_replace_termcodes('<Cmd>call v:lua.call()<CR>', true, false, true), 
+            'n', 
+            true
+        )
+    end
+})
+
+_G.call = function() end
+
 local conditions = require("heirline.conditions")
 local utils = require("heirline.utils")
 
 local colors = {
     cursor = utils.get_highlight("StatusLine").bg,
     boring = utils.get_highlight("StatusLineNC").fg,
+    plaintext = utils.get_highlight("Normal").fg,
+    statuslinebg = utils.get_highlight("StatusLine").fg,
     bright_fg = utils.get_highlight("Folded").fg,
     red = utils.get_highlight("DiagnosticError").fg,
     dark_red = utils.get_highlight("DiffDelete").bg,
@@ -17,53 +37,47 @@ local colors = {
     diag_error = utils.get_highlight("DiagnosticError").fg,
     diag_hint = utils.get_highlight("DiagnosticHint").fg,
     diag_info = utils.get_highlight("DiagnosticInfo").fg,
-    git_del = utils.get_highlight("diffDeleted").fg,
-    git_add = utils.get_highlight("diffAdded").fg,
-    git_change = utils.get_highlight("diffChanged").fg,
 }
 
-local ViMode = {
-    -- get vim current mode, this information will be required by the provider
-    -- and the highlight functions, so we compute it only once per component
-    -- evaluation and store it as a component attribute
+local align = { provider = "%=" }
+local space = { provider = " " }
+
+local mode_icon = {
     init = function(self)
-        self.mode = vim.fn.mode(1) -- :h mode()
+        self.mode = vim.fn.mode(1)
     end,
-    -- Now we define some dictionaries to map the output of mode() to the
-    -- corresponding string and color. We can put these into `static` to compute
-    -- them at initialisation time.
     static = {
-        mode_names = { -- change the strings if you like it vvvvverbose!
+        mode_names = {
             n = "N",
-            no = "N?",
-            nov = "N?",
-            noV = "N?",
-            ["no\22"] = "N?",
-            niI = "Ni",
-            niR = "Nr",
-            niV = "Nv",
-            nt = "Nt",
-            v = "V",
-            vs = "Vs",
-            V = "V_",
-            Vs = "Vs",
-            ["\22"] = "^V",
-            ["\22s"] = "^V",
-            s = "S",
-            S = "S_",
-            ["\19"] = "^S",
+            no = "N",
+            nov = "N",
+            noV = "N",
+            ["no\22"] = "N",
+            niI = "N",
+            niR = "N",
+            niV = "N",
+            nt = "N",
+            v = "v",
+            vs = "v",
+            V = "v",
+            Vs = "v",
+            ["\22"] = "V",
+            ["\22s"] = "V",
+            s = "s",
+            S = "S",
+            ["\19"] = "S",
             i = "I",
-            ic = "Ic",
-            ix = "Ix",
+            ic = "I",
+            ix = "I",
             R = "R",
-            Rc = "Rc",
-            Rx = "Rx",
-            Rv = "Rv",
-            Rvc = "Rv",
-            Rvx = "Rv",
-            c = "C",
-            cv = "Ex",
-            r = "...",
+            Rc = "R",
+            Rx = "R",
+            Rv = "R",
+            Rvc = "R",
+            Rvx = "R",
+            c = ":",
+            cv = ":",
+            r = ".",
             rm = "M",
             ["r?"] = "?",
             ["!"] = "!",
@@ -85,114 +99,249 @@ local ViMode = {
             t =  "red",
         }
     },
-    -- We can now access the value of mode() that, by now, would have been
-    -- computed by `init()` and use it to index our strings dictionary.
-    -- note how `static` fields become just regular attributes once the
-    -- component is instantiated.
-    -- To be extra meticulous, we can also add some vim statusline syntax to
-    -- control the padding and make sure our string is always at least 2
-    -- characters long. Plus a nice Icon.
     provider = function(self)
         local mode = self.mode:sub(1, 1)
-        return "%2("..self.mode_names[self.mode].."%)"
+        return self.mode_names[self.mode]
     end,
-    -- Same goes for the highlight. Now the foreground will change according to the current mode.
     hl = function(self)
         local mode = self.mode:sub(1, 1) -- get only the first mode character
-        return { fg = self.mode_colors[mode], bold = true, }
+        return { fg = self.mode_colors[mode], bg="statuslinebg", bold = true, reverse=false}
     end,
-    -- Re-evaluate the component only on ModeChanged event!
-    -- Also allows the statusline to be re-evaluated when entering operator-pending mode
     update = {
         "ModeChanged",
         pattern = "*:*",
-        callback = vim.schedule_wrap(function()
-            vim.cmd("redrawstatus")
-        end),
     },
 }
 
-function mode_icon(static)
-    return {
-        static = static,
-        provider = function(self)
-            if type(self.icon) == "function" then
-                return self.icon(vim.fn.mode(1))
-            else
-                return self.icon
-            end
-        end,
-        hl = function(self)
-            if self.is_active(vim.fn.mode(1)) then
-                return {
-                    fg = self.active_color,
-                    bold = false,
-                }
-            else
-                return {
-                    fg = "boring",
-                    bold = true,
-                }
-            end
-        end,
-        update = {
-            "ModeChanged",
-            pattern = "*:*",
-            callback = vim.schedule_wrap(function()
-                vim.cmd("redrawstatus")
-            end),
-        },
-    }
-end
-
 vim.cmd[[set noshowmode]]
 
-local mode_icons = {
-    mode_icon({
-        icon = "",
-        active_color = "green",
-        is_active = function(mode)
-            return mode:sub(1, 1) == "n" or mode:sub(1, 1) == "N"
-        end,
-    }),
-    mode_icon({
-        icon = "",
-        active_color = "orange",
-        is_active = function(mode)
-            return mode:sub(1, 1) == "i" or mode:sub(1, 1) == "I"
-        end,
-    }),
-    mode_icon({
-        icon = function(mode)
-            if mode == "V" or mode == "<C-V>" then
-                return "󰒅"
-            else
-                return "󰒆"
-            end
-        end,
-        active_color = "cyan",
-        is_active = function(mode)
-            return mode:sub(1, 1) == "v" or mode == "V" or mode == "<C-V>"
-        end,
-    }),
+local file_name_block = {
+    init = function(self)
+        self.filename = vim.api.nvim_buf_get_name(0)
+    end,
 }
 
-local default_status_line = { mode_icons }
+local file_icon = {
+    init = function(self)
+        local filename = self.filename
+        local extension = vim.fn.fnamemodify(filename, ":e")
+        self.icon, self.icon_color = require("nvim-web-devicons").get_icon_color(filename, extension, { default = true })
+    end,
+    provider = function(self)
+        return self.icon
+    end,
+    hl = function(self)
+        return { fg = self.icon_color }
+    end
+}
+
+local file_name = {
+    provider = function(self)
+        -- :h filename-modifers
+        local filename = vim.fn.fnamemodify(self.filename, ":.")
+        if filename == "" then return "[noname]" end
+        -- if the filename would occupy more than 1/4th of the available space, we trim the file 
+        -- path to its initials
+        if not conditions.width_percent_below(#filename, 0.25) then
+            filename = vim.fn.pathshorten(filename)
+        end
+        return filename
+    end,
+    hl = { fg = "plaintext", },
+}
+
+local file_name_color_modifier = {
+    hl = function()
+        if vim.bo.modified then
+            -- use `force` because we need to override the child's hl foreground
+            return { fg = "plaintext", bold = true, force=true }
+        end
+    end,
+}
+
+local file_name_save_indicator = {
+    provider = function(self)
+        if vim.bo.readonly then
+            return "."
+        elseif vim.bo.modified then
+            return "*"
+        else
+            return " "
+        end
+    end,
+    hl = { fg = "plaintext", },
+}
+
+file_name_block = utils.insert(
+    file_name_block, 
+    file_icon, 
+    space,
+    utils.insert(file_name_color_modifier, file_name, file_name_save_indicator)
+)
+
+local ruler = {
+    provider = "(%1.4l, %1.2c)",
+    hl = { fg = "plaintext", },
+}
+
+local scrollbar = {
+    static = {
+        sbar = { '█', '▇', '▆', '▅', '▄', '▃', '▂', '▁' }
+    },
+    provider = function(self)
+        local curr_line = vim.api.nvim_win_get_cursor(0)[1]
+        local lines = vim.api.nvim_buf_line_count(0)
+        local i = math.floor((curr_line - 1) / lines * #self.sbar) + 1
+        return string.rep(self.sbar[i], 2)
+    end,
+    hl = { fg = "plaintext", },
+}
+
+local pos_info_block = { scrollbar, space, ruler, }
+
+local copilot_active = {
+    condition = function()
+        for _, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+            if server.name == "copilot" then return true end
+        end
+        return false
+    end,
+    provider = function()
+        return "󰚩"
+    end,
+    hl = { fg = "green", bold = true },
+}
+
+local lsp_active = {
+    condition = conditions.lsp_attached,
+    update = {'LspAttach', 'LspDetach'},
+
+    provider  = function()
+        local names = {}
+        for i, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+            if server.name ~= "copilot" then
+                -- get first three chars of the server name
+                local concatname = string.sub(server.name, 1, 4)
+                table.insert(names, concatname)
+            end
+        end
+
+        if #names == 0 then 
+            return ""
+        else
+            return "[" .. table.concat(names, ", ") .. "]"
+        end
+    end,
+    hl = { fg = "green", bold = true },
+}
+
+local diagnostics = {
+    condition = function() 
+        if vim.bo.readonly then return false end
+
+        for _, server in pairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+            if server.name ~= "copilot" then return true end
+        end
+
+        return false
+    end,
+
+    static = {
+        -- strip whitespcae off of string
+        error_icon = vim.fn.sign_getdefined("DiagnosticSignError")[1].text:match("%S+"),
+        warn_icon = vim.fn.sign_getdefined("DiagnosticSignWarn")[1].text:match("%S+"),
+        info_icon = vim.fn.sign_getdefined("DiagnosticSignInfo")[1].text:match("%S+"),
+        hint_icon = vim.fn.sign_getdefined("DiagnosticSignHint")[1].text:match("%S+"),
+    },
+
+    init = function(self)
+        self.errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
+        self.warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
+        self.hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
+        self.info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO })
+
+        self.nodiagnostics = self.errors == 0 and self.warnings == 0 and self.hints == 0 and self.info == 0
+    end,
+
+    update = { "DiagnosticChanged", "BufEnter" },
+
+    hl = function(self)
+        if self.nodiagnostics then
+            return { fg = "plaintext", bold=false, force=true }
+        else
+            return { fg = "plaintext", }
+        end
+    end,
+
+    {
+        provider = function(self)
+            if self.errors == 0 then return self.error_icon else return self.errors end
+        end,
+        hl = { fg = "diag_error" },
+    },
+    space,
+    {
+        provider = function(self)
+            if self.warnings == 0 then return self.warn_icon else return self.warnings end
+        end,
+        hl = { fg = "diag_warn" },
+    },
+    space,
+    {
+        provider = function(self)
+            if self.hints == 0 then return self.hint_icon else return self.hints end
+        end,
+        hl = { fg = "diag_info" },
+    },
+    space,
+    {
+        provider = function(self)
+            if self.info == 0 then return self.info_icon else return self.info end
+        end,
+        hl = { fg = "diag_hint" },
+    },
+}
+
+local dap_messages = {
+    provider = function()
+        if session == nil then
+            return "No debug session."
+        else 
+            return require("dap").status()
+        end
+    end,
+    hl = "Debug"
+    -- see Click-it! section for clickable actions
+}
+
+local default_status_line = { 
+    condition = function() return conditions.is_active() and not vim.g.debug_mode end ,
+
+    space, mode_icon, space, file_name_block, space, pos_info_block, align, copilot_active, space, lsp_active, space, diagnostics, space 
+}
+
+local debugging_status_line = {
+    condition = function() return conditions.is_active() and vim.g.debug_mode end ,
+
+    space, { provider = "DEBUG", hl = { fg = "purple", bold = true } }, space, dap_messages, align
+}
+
+local inactive_status_line = {
+    condition = conditions.is_not_active,
+
+    space, file_name_block, align, space, lsp_active, space, diagnostics, space
+}
 
 local StatusLines = {
     hl = function()
-        if conditions.is_active() then
-            return "StatusLine"
-        else
-            return "StatusLineNC"
-        end
+        return { bg = "statuslinebg", reverse=false, }
     end,
 
     -- the first statusline with no condition, or which condition returns true is used.
     -- think of it as a switch case with breaks to stop fallthrough.
-    fallthrough = default_status_line,
+    fallthrough = false,
 
-    default_status_line,
+    default_status_line, inactive_status_line, debugging_status_line
 }
 
 require("heirline").setup({ 

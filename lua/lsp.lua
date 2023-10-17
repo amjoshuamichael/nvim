@@ -13,6 +13,7 @@ vim.diagnostic.config({
         header = "",
         padding = 2,
     },
+    update_in_insert = true,
 })
 
 -- Prevent floating LSP error windows from moving all the way to the left side of the screen 

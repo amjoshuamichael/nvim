@@ -1,46 +1,47 @@
 return {
     -- giving up
-    {
-        "zbirenbaum/copilot.lua",
-        cmd = "Copilot",
-        build = ":Copilot auth",
-        opts = {
-            suggestion = {
-                enabled = true,
-                auto_trigger = true,
-                debounce = 75,
-                keymap = {
-                    accept = "<M-l>",
-                    accept_word = false,
-                    accept_line = false,
-                    next = "<M-]>",
-                    prev = "<M-[>",
-                    dismiss = "<C-]>",
-                },
-            },
-        }
-    },
+    --{
+    --    "zbirenbaum/copilot.lua",
+    --    cmd = "Copilot",
+    --    build = ":Copilot auth",
+    --    opts = {
+    --        suggestion = {
+    --            enabled = true,
+    --            auto_trigger = true,
+    --            debounce = 75,
+    --            keymap = {
+    --                accept = "<M-l>",
+    --                accept_word = false,
+    --                accept_line = false,
+    --                next = "<M-]>",
+    --                prev = "<M-[>",
+    --                dismiss = "<C-]>",
+    --            },
+    --        },
+    --    }
+    --},
 
     -- dev utilities
 	'svermeulen/vimpeccable',
 
+    -- colorschemes
     "https://github.com/morhetz/gruvbox",
-    "rebelot/kanagawa.nvim",
+    "svermeulen/text-to-colorscheme.nvim",
 
     -- File explorer
 	{
 		"nvim-neo-tree/neo-tree.nvim",
         branch = 'v2.x',
 		dependencies = {
-			{
-			      "nvim-tree/nvim-web-devicons",
-			      "MunifTanjim/nui.nvim",
-		      }
-	      }
-      },
+            {
+                "nvim-tree/nvim-web-devicons",
+                "MunifTanjim/nui.nvim",
+            },
+        },
+    },
 
     -- Window management
-	'beauwilliams/focus.nvim',
+	'nvim-focus/focus.nvim',
 
     -- File finding
 	'nvim-lua/plenary.nvim',
@@ -71,7 +72,11 @@ return {
             {'rafamadriz/friendly-snippets'},
         }
     },
-    'j-hui/fidget.nvim', -- loading
+
+    {
+        'j-hui/fidget.nvim', -- loading
+        branch = "legacy",
+    },
 
     -- language specific
     'rust-lang/rust.vim',
@@ -87,12 +92,6 @@ return {
         dependencies = {
             'mfussenegger/nvim-dap',
         }
-    },
-
-    {
-        'Iron-E/nvim-libmodal',
-        lazy = true,
-        version = '^3.0'
     },
 
     'rebelot/heirline.nvim',

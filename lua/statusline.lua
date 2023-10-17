@@ -180,7 +180,7 @@ file_name_block = utils.insert(
 )
 
 local ruler = {
-    provider = "(%1.4l, %1.2c)",
+    provider = "(%1.4l, %1.3c)",
     hl = { fg = "plaintext", },
 }
 

@@ -238,6 +238,7 @@ vim.diagnostic.config({
 	header = "",  
        padding = 2,
 	},
+    update_in_insert = true,
 })
 
 local open_float = function()
@@ -327,8 +328,7 @@ parser_config.cxc = {
   filetype = "cxc",
 }
 
-local ft_to_parser = require"nvim-treesitter.parsers".filetype_to_parsername
-ft_to_parser.cxc = "cxc" -- the someft filetype will use the python parser and queries.
+require"nvim-treesitter.language".register("cxc", "cxc")
 
 EOF
 

@@ -23,7 +23,7 @@ require('lazy').setup('plugins', {
     },
     spec = {
         { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-        { import = "lazyvim.plugins.extras.coding.copilot" },
+	--{ import = "lazyvim.plugins.extras.coding.copilot" },
         { import = "plugins" },
     },
     performance = {
@@ -49,6 +49,7 @@ vim.cmd [[ let g:gruvbox_contrast_dark = 'hard' ]]
 
 --vim.cmd.colorscheme("kanagawa")
 vim.cmd.colorscheme("gruvbox")
+--vim.cmd.colorscheme("text-to-colorscheme")
 
 -- Disable of netrw recommended for nvim-tree
 vim.g.loaded_netrw = 1
@@ -74,6 +75,14 @@ require('fidget').setup({
     },
 })
 
+--vim.o.background = "dark"
+--
+--require('text-to-colorscheme').setup {
+--  ai = {
+--    openai_api_key = "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",
+--  },
+--}
+
 require('keybinds')
 require('utilities')
 require('lsp')
@@ -81,10 +90,10 @@ require('treesitter')
 require('debugging')
 require('statusline')
 --require('mypallete')
-require('copilot').setup({
-    suggestion = {
-        enabled = true,
-        auto_trigger = true,
-        debounce = 75,
-    },
-})
+--require('copilot').setup({
+--    suggestion = {
+--        enabled = true,
+--        auto_trigger = true,
+--        debounce = 75,
+--    },
+--})

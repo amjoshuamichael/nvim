@@ -33,7 +33,11 @@ vim.api.nvim_create_autocmd({"CursorMoved"}, { callback = open_float })
 local lspconfig = require('lspconfig')
 lspconfig.rust_analyzer.setup {
     settings = {
-        ['rust-analyzer'] = {},
+        ['rust-analyzer'] = {
+            diagnostics = {
+                disabled = { "inactive-code", "unresolved-proc-macro" },
+            },
+        },
     },
     init_options = {
         --cargo = {
@@ -45,6 +49,17 @@ lspconfig.rust_analyzer.setup {
         --    enable = true,
         --}
     }
+}
+
+require'lspconfig'.lua_ls.setup {
+  settings = {
+    Lua = {
+      diagnostics = {
+        -- Get the language server to recognize the `vim` global
+        globals = {'vim'},
+      },
+    },
+  },
 }
 
 -- from https://github.com/folke/trouble.nvim/issues/52

@@ -1,19 +1,4 @@
-local vimp = require("vimp")
-bindopts = { silent = true }
-
--- vimp.nnoremap("<Esc>", function()
--- 	if #vim.api.nvim_list_wins() == 1 then
--- 		return
--- 	end
--- 
--- 	if vim.api.nvim_buf_get_name(0) ~= "" 
--- 		and vim.api.nvim_buf_get_option(0, "buftype") ~= "nofile" 
--- 		and not vim.bo[vim.api.nvim_win_get_buf(0)].readonly then
--- 		vim.cmd("wq")
--- 	else
--- 		vim.cmd("q!")
--- 	end
--- end)
+local bindopts = { silent = true }
 
 vim.api.nvim_set_keymap("n", "sh", ":FocusSplitLeft<CR>", bindopts)
 vim.api.nvim_set_keymap("n", "sj", ":FocusSplitDown<CR>", bindopts)
@@ -21,11 +6,12 @@ vim.api.nvim_set_keymap("n", "sk", ":FocusSplitUp<CR>", bindopts)
 vim.api.nvim_set_keymap("n", "sl", ":FocusSplitRight<CR>", bindopts)
 vim.api.nvim_set_keymap("n", "ss", ":FocusSplitNicely<CR>", bindopts)
 
-vim.keymap.set("n", "<Leader>t", ":Neotree toggle=true<CR>")
+vim.keymap.set("n", "<Leader>t", ":Neotree toggle=true<CR>", bindopts)
 
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<leader>f", builtin.find_files, {})
 vim.keymap.set("n", "<leader>g", builtin.live_grep, {})
+vim.keymap.set("n", "<leader>G", builtin.grep_string, {})
 
 local warnopts = { severity = vim.diagnostic.severity.WARN }
 local erroropts = { severity = vim.diagnostic.severity.ERROR }

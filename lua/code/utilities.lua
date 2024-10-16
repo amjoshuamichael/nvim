@@ -44,3 +44,32 @@ function SerializeTable(val, name, skipnewlines, depth)
 
     return tmp
 end
+
+-- https://stackoverflow.com/questions/9464844/how-to-get-group-name-of-highlighting-under-cursor-in-vim
+vim.cmd[[
+    nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
+    \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
+    \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+
+    function! SynStack()
+      if !exists("*synstack")
+        return
+      endif
+      echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+    endfunc
+
+    function! SynGroup()
+        let l:s = synID(line('.'), col('.'), 1)
+        echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+    endfun
+
+    function! InspectSynHL()
+        let l:synNames = []
+        let l:idx = 0
+        for id in synstack(v:beval_lnum, v:beval_col)
+            call add(l:synNames, printf('%s%s', repeat(' ', idx), synIDattr(id, 'name')))
+            let l:idx+=1
+        endfor
+        echo join(l:synNames, "\n")
+    endfun
+]]

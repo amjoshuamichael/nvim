@@ -32,5 +32,14 @@ vim.api.nvim_create_autocmd({"BufNewFile", "BufRead", "BufEnter"}, {
     command = "set syntax=html",
 })
 
+vim.api.nvim_create_autocmd({"BufNewFile", "BufRead", "BufEnter"}, {
+    pattern = {"*.vert", "*.frag", "*.comp"},
+    command = "set filetype=glsl | set syntax=glsl",
+})
+require("vim.treesitter.language").register("glsl", { "vert", "frag", "comp" })
 
---require("vim.treesitter.query").set_query("cxc", "highlights", "(comment) @comment")
+vim.api.nvim_create_autocmd({"BufNewFile", "BufRead", "BufEnter"}, {
+    pattern = {"*.whm"},
+    command = "set syntax=rust",
+})
+

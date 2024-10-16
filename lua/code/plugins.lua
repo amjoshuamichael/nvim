@@ -1,31 +1,11 @@
 return {
-    -- giving up
-    --{
-    --    "zbirenbaum/copilot.lua",
-    --    cmd = "Copilot",
-    --    build = ":Copilot auth",
-    --    opts = {
-    --        suggestion = {
-    --            enabled = true,
-    --            auto_trigger = true,
-    --            debounce = 75,
-    --            keymap = {
-    --                accept = "<M-l>",
-    --                accept_word = false,
-    --                accept_line = false,
-    --                next = "<M-]>",
-    --                prev = "<M-[>",
-    --                dismiss = "<C-]>",
-    --            },
-    --        },
-    --    }
-    --},
-
     -- dev utilities
 	'svermeulen/vimpeccable',
 
     -- colorschemes
     "https://github.com/morhetz/gruvbox",
+    { "rose-pine/neovim", name = "rose-pine" },
+    { "nightsense/strawberry" },
     "svermeulen/text-to-colorscheme.nvim",
 
     -- File explorer
@@ -59,7 +39,7 @@ return {
             {'williamboman/mason.nvim'},
             {'williamboman/mason-lspconfig.nvim'},
 
-            -- Autocompletion
+            ---- Autocompletion
             {'hrsh7th/nvim-cmp'},
             {'hrsh7th/cmp-nvim-lsp'},
             {'hrsh7th/cmp-buffer'},
@@ -67,7 +47,7 @@ return {
             {'saadparwaiz1/cmp_luasnip'},
             {'hrsh7th/cmp-nvim-lua'},
 
-            -- Snippets
+            ---- Snippets
             {'L3MON4D3/LuaSnip'},
             {'rafamadriz/friendly-snippets'},
         }

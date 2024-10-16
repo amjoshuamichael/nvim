@@ -30,7 +30,7 @@ dap.configurations.rust = dap.configurations.cpp
 vim.keymap.set("n", "<F7>", dap.toggle_breakpoint, { noremap = true, silent = true })
 
 local unmap = function(key)
-    vim.cmd("nunmap " .. key)
+    vim.cmd("silent! nunmap " .. key)
 end
 
 local exit_debug_mode = function()
@@ -44,8 +44,16 @@ local exit_debug_mode = function()
     unmap("r")
     unmap("a")
     unmap("A")
+    unmap("h")
+    unmap("p")
+    unmap("f")
+    unmap("s")
+    unmap("C")
+    unmap("D")
     unmap("<ESC>")
 end
+
+Views = {}
 
 local enter_debug_mode = function()
     vim.g.debug_mode = true
@@ -70,6 +78,34 @@ local enter_debug_mode = function()
     end, mapopts)
     vim.keymap.set("n", "a", dap.up, mapopts)
     vim.keymap.set("n", "A", dap.down, mapopts)
+    vim.keymap.set("n", "h", function()
+        local view = require('dap.ui.widgets').hover()
+        table.insert(Views, view)
+    end, mapopts)
+    vim.keymap.set("n", "p", function()
+        local view = require('dap.ui.widgets').preview()
+        table.insert(Views, view)
+    end, mapopts)
+    vim.keymap.set("n", "f", function()
+        local widgets = require('dap.ui.widgets')
+        local view = widgets.centered_float(widgets.frames)
+        table.insert(Views, view)
+    end, mapopts)
+    vim.keymap.set("n", "s", function()
+        local widgets = require('dap.ui.widgets')
+        local view = widgets.centered_float(widgets.scopes)
+        table.insert(Views, view)
+    end, mapopts)
+    vim.keymap.set("n", "C", function()
+        for _, view in pairs(Views) do
+            view.close()
+        end
+
+        Views = {}
+    end)
+    vim.keymap.set("n", "D", function()
+        require'dap'.disconnect({ terminateDebuggee = true })
+    end)
     vim.keymap.set("n", "<ESC>", exit_debug_mode, mapopts)
 end
 
@@ -120,7 +156,7 @@ vim.api.nvim_create_user_command(
 
 require("nvim-dap-virtual-text").setup()
 
-vim.keymap.set("n", "<F8>", function() 
+vim.keymap.set("n", "<F8>", function()
     if vim.g.debug_mode then
         exit_debug_mode()
     else

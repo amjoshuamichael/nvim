@@ -84,6 +84,14 @@ require('fidget').setup({
     },
 })
 
+require("telescope").setup({
+  defaults = {
+    preview = {
+      filesize_limit = 0.5,
+    },
+  },
+})
+
 require('code.keybinds')
 require('code.utilities')
 require('code.lsp')

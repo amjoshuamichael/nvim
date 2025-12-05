@@ -18,16 +18,28 @@ local add = MiniDeps.add
 -- colorscheme(s) & icons
 
 -- gruvbox
---add("https://github.com/ellisonleao/gruvbox.nvim")
---require("gruvbox").setup({ italic = { strings = false } })
---vim.cmd[[colorscheme gruvbox]]
+add("https://github.com/ellisonleao/gruvbox.nvim")
+require("gruvbox").setup({ 
+    italic = { strings = false },
+    contrast = "hard"
+})
+vim.cmd[[colorscheme gruvbox]]
+
+-- witchhazel
+add("https://github.com/theacodes/witchhazel")
 
 -- cyberdream
 add("https://github.com/scottmckendry/cyberdream.nvim")
 require("cyberdream").setup({ 
     theme = { variant = "light" },
 })
-vim.cmd[[colorscheme cyberdream]]
+
+-- catppuccin
+add("https://github.com/catppuccin/nvim")
+require("catppuccin").setup({
+    flavour = "mocha",
+    no_italic = true,
+})
 
 add('echasnovski/mini.icons')
 require('mini.icons').setup()
@@ -37,13 +49,14 @@ add({ source = "https://github.com/echasnovski/mini.files" })
 require('mini.files').setup({
   mappings = {
     close       = '<ESC>',
-    go_in_plus  = 'l',
-    go_out_plus = 'h',
+    go_in       = '}',
+    go_out      = '{',
+    go_in_plus  = ']',
+    go_out_plus = '[',
     synchronize = '=',
     trim_left   = '<',
     trim_right  = '>',
   },
-
   options = {
     permanent_delete = false,
     use_as_default_explorer = false,
@@ -58,14 +71,12 @@ add({ source = "https://github.com/BurntSushi/ripgrep" })
 add({ source = "https://github.com/echasnovski/mini.pick" })
 require('mini.pick').setup()
 vim.keymap.set("n", "<leader>f", "<cmd>Pick files tool='git'<cr>")
-vim.keymap.set("n", "<leader>g", "<cmd>Pick grep_live<cr>")
 
 -- copy / paste to system clipboard
 vim.keymap.set("v", "<leader>y", '"+y', {})
 vim.keymap.set("n", "<leader>Y", '"+yg_', {})
 vim.keymap.set("n", "<leader>y", '"+y', {})
 vim.keymap.set("n", "<leader>yy", '"+yy', {})
-
 vim.keymap.set("n","<leader>p", '"+p', {})
 vim.keymap.set("n","<leader>P", '"+P', {})
 vim.keymap.set("v","<leader>p", '"+p', {})
@@ -85,27 +96,16 @@ vim.opt.expandtab = true
 vim.opt.relativenumber = true
 vim.opt.signcolumn = 'number'
 
+-- color column
+vim.opt.colorcolumn = "81"
+
 -- treesitter
 add("https://github.com/nvim-treesitter/nvim-treesitter")
 require("nvim-treesitter").setup()
 require("nvim-treesitter.configs").setup({
     highlight = { enable = true },
 })
-
-vim.api.nvim_create_autocmd({"BufNewFile", "BufRead", "BufEnter"}, {
-    pattern = {"*.vert", "*.frag", "*.comp"},
-    command = "set filetype=glsl | set syntax=glsl",
-})
 require("vim.treesitter.language").register("glsl", { "vert", "frag", "comp" })
-
--- minimap
-vim.g.neominimap = {
-    git = { enabled = false },
-    auto_enable = false,
-}
-add("https://github.com/Isrothy/neominimap.nvim")
-vim.keymap.set("n", "<leader>m" , "<cmd>Neominimap toggle<cr>")
-vim.keymap.set("n", "<leader>M", "<cmd>Neominimap refresh<cr>")
 
 -- focus
 add("https://github.com/nvim-focus/focus.nvim")
@@ -129,7 +129,7 @@ local telescope_finders = require('telescope.finders')
 local telescope_pickers = require('telescope.pickers')
 local telescope_previewers = require('telescope.previewers')
 local telescope_config = require('telescope.config').values
-local telescope_actions =require('telescope.actions') 
+local telescope_actions = require('telescope.actions') 
 
 local function find_odin_symbols()
     local bufnr = vim.api.nvim_get_current_buf()
@@ -202,9 +202,6 @@ local function find_odin_symbols()
     }):find()
 end
 
-vim.api.nvim_create_user_command('OdinSymbols', find_odin_symbols, {})
-vim.keymap.set("n", "<leader>s", "<cmd>OdinSymbols<CR>")
-
 local function odin_goto_definition()
     local word = vim.fn.expand('<cword>')
     local regex = string.format("'(^|\\W+)%s *::'", word)
@@ -226,14 +223,6 @@ local function odin_goto_definition()
     end
 end
 
-vim.api.nvim_create_autocmd('FileType', {
-    pattern = 'odin',
-    callback = function()
-        vim.keymap.set('n', 'gd', odin_goto_definition, {buffer = true})
-    end
-})
-
--- LSP
 function odin_check()
   -- Save current file
   vim.cmd('write')
@@ -244,11 +233,73 @@ function odin_check()
   vim.cmd('copen')
 end
 
--- Map it to a key, for example F5
-vim.keymap.set('n', '<leader>c', odin_check)
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'odin',
+    callback = function()
+        vim.keymap.set('n', 'gd', odin_goto_definition, {buffer = true})
+        vim.api.nvim_create_user_command('OdinSymbols', find_odin_symbols, {})
+        vim.keymap.set("n", "<leader>s", "<cmd>OdinSymbols<CR>")
+        vim.keymap.set('n', '<leader>c', odin_check)
+    end
+})
+
+-- grep
+vim.keymap.set("n", "<leader>g", "<cmd>Telescope live_grep<cr>")
 
 -- Close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd(
-  "FileType", {
-  pattern={"qf"},
-  command=[[nnoremap <buffer> <CR> <CR>:cclose<CR>zz]]})
+  "FileType", 
+  {
+    pattern={"qf"},
+    command=[[nnoremap <buffer> <CR> <CR>:cclose<CR>zz]]
+  }
+)
+
+add('mrcjkb/rustaceanvim')
+vim.g.rustaceanvim = {
+    tools = {
+        cargo_override = "RUSTFLAGS='-Awarnings' cargo"
+    }
+}
+
+vim.keymap.set('n', '<leader>e', function() vim.cmd.RustLsp { 'testables', bang = true }  end)
+vim.keymap.set('n', '<leader>E', function() vim.cmd.RustLsp { 'testables' } end)
+
+vim.diagnostic.config({
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = '',
+            [vim.diagnostic.severity.WARN] = '',
+            [vim.diagnostic.severity.HINT] = '',
+            [vim.diagnostic.severity.INFO] = '',
+        },
+    },
+    update_in_insert = true,
+    underline = true,
+})
+
+local warnopts = { severity = vim.diagnostic.severity.WARN }
+vim.keymap.set("n", "[w", function() vim.diagnostic.goto_prev(warnopts) end, bindopts)
+vim.keymap.set("n", "]w", function() vim.diagnostic.goto_next(warnopts) end, bindopts)
+local erroropts = { severity = vim.diagnostic.severity.ERROR }
+vim.keymap.set("n", "[e", function() vim.diagnostic.goto_prev(erroropts) end, bindopts)
+vim.keymap.set("n", "]e", function() vim.diagnostic.goto_next(erroropts) end, bindopts)
+
+-- Prevent floating LSP error windows from moving all the way to the left side of the screen 
+
+local open_float = function()
+    local mode = vim.fn.mode();
+    if mode == 'v' or mode == 'V' or mode == '\x16' then
+        return
+    end
+
+    local _, cursor_x = unpack(vim.api.nvim_win_get_cursor(0))
+
+    if cursor_x == 0 then
+        vim.diagnostic.open_float({ prefix = "", border = {" ", "", "", " "}})
+    else
+        vim.diagnostic.open_float({ prefix = "", border = {""}})
+    end
+end
+
+vim.api.nvim_create_autocmd({"CursorMoved"}, { callback = open_float })

@@ -21,9 +21,13 @@ local add = MiniDeps.add
 add("https://github.com/ellisonleao/gruvbox.nvim")
 require("gruvbox").setup({ 
     italic = { strings = false },
-    contrast = "hard"
+    contrast = "hard",
+    palette_overrides = {
+        QuickFixLine = "#ff0000",
+    },
 })
 vim.cmd[[colorscheme gruvbox]]
+--vim.api.nvim_set_hl(0, 'QuickFixLine', { bg = "#ff0000", underline = true, force = true })
 
 -- witchhazel
 add("https://github.com/theacodes/witchhazel")
@@ -43,6 +47,8 @@ require("catppuccin").setup({
 
 add('echasnovski/mini.icons')
 require('mini.icons').setup()
+
+vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
 
 -- file explorer
 add({ source = "https://github.com/echasnovski/mini.files" })
@@ -303,3 +309,29 @@ local open_float = function()
 end
 
 vim.api.nvim_create_autocmd({"CursorMoved"}, { callback = open_float })
+
+vim.keymap.set('n', '<F5>', function()
+  for i = -1, -50, -1 do
+    local cmd = vim.fn.histget('cmd', i)
+    if cmd == '' then break end
+    if cmd:match('^!') then
+      vim.cmd(cmd)
+      return
+    end
+  end
+  print('No shell command in history')
+end)
+
+vim.lsp.config('*', {
+  root_markers = { '.git', '.hg' },
+})
+
+vim.lsp.config.zls = {
+  cmd = { 'zls' },
+  filetypes = { 'zig', 'zir' },
+  root_markers = { 'zls.json', 'build.zig', '.git' },
+  workspace_required = false,
+  enable_build_on_save = true,
+}
+
+vim.lsp.enable('zls')
